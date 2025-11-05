@@ -23,18 +23,21 @@
       </div>
 
       <!-- Total + acción -->
-      <div class="border rounded-2xl p-4 h-max">
-        <div class="flex items-center justify-between mb-3">
-          <span class="font-semibold">Subtotal</span>
-          <span class="font-bold">₲ {{ '%.0f'|format(total) }}</span>
-        </div>
-        <p class="text-sm text-gray-600 mb-4">En esta demo no se procesan pagos reales.</p>
-        <form method="post" action="{{ url_for('cart.clear') }}" onsubmit="showToast && showToast({type:'success', title:'Gracias por tu compra'});">
-          <button class="btn btn-primary w-full">Confirmar pedido</button>
-        </form>
-        <a href="{{ url_for('index') }}" class="btn w-full mt-2">Seguir comprando</a>
-      </div>
-    </div>
+<div class="border rounded-2xl p-4 h-max flex flex-col gap-3">
+  <div class="flex items-center justify-between mb-3">
+    <span class="font-semibold">Subtotal</span>
+    <span class="font-bold">₲ {{ '%.0f'|format(total) }}</span>
+  </div>
+  <p class="text-sm text-gray-600 mb-4">En esta demo no se procesan pagos reales.</p>
+
+  <!-- Botones en columna -->
+  <form method="post" action="{{ url_for('cart.clear') }}" onsubmit="showToast && showToast({type:'success', title:'Gracias por tu compra'});">
+    <button class="btn btn-primary w-full">Confirmar pedido</button>
+  </form>
+
+  <a href="{{ url_for('index') }}" class="btn w-full mt-2 text-center">Seguir comprando</a>
+
+</div>
   {% endif %}
 </section>
 {% endblock %}

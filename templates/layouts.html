@@ -9,24 +9,22 @@
   <meta name="theme-color" content="#000000">
   <link rel="canonical" href="{{ request.url_root.rstrip('/') ~ url_for('index') }}">
 
-  <!-- Open Graph -->
+  <!-- Open Graph / Twitter -->
   <meta property="og:title" content="{{ site_title }}">
   <meta property="og:description" content="Accesorios góticos hechos a mano. Descubrí FAIGOTHY.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="{{ request.url_root }}">
   <meta property="og:image" content="{{ url_for('static', filename='img/og_default.jpg', _external=True) }}">
-
-  <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="{{ site_title }}">
   <meta name="twitter:description" content="Accesorios góticos hechos a mano.">
   <meta name="twitter:image" content="{{ url_for('static', filename='img/og_default.jpg', _external=True) }}">
 
-  <!-- Icons -->
+  <!-- Favicon / Icons -->
   <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}">
   <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
 
-  <!-- Tailwind (CDN) -->
+  <!-- Tailwind CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
 
   <!-- Fuente Playfair -->
@@ -58,12 +56,16 @@
   }
   </script>
 
-  <!-- === Mejora 1: CSS responsive + a11y + micro-UX === -->
+  <!-- === CSS personalizado === -->
   <style>
     html, body { background:#fff; }
     .font-playfair { font-family: 'Times New Roman', serif; }
     :root{ --negro:#000; --borde:#e5e7eb; }
-    
+
+    /* Estructura flex para sticky footer */
+    body { display:flex; flex-direction:column; min-height:100vh; }
+
+    main { flex-grow:1; }
 
     /* Navbar */
     #navbar { position:sticky; top:0; left:0; right:0; z-index:50; background:#fff; border-bottom:1px solid var(--borde); }
@@ -74,13 +76,13 @@
     .overlay{ position:fixed; inset:0; background: rgba(0,0,0,0.24); opacity:0; pointer-events:none; transition:opacity .2s; z-index:45;}
     .overlay.show{ opacity:1; pointer-events:auto; }
 
-    #side-menu{ position:fixed; top:0; left:0; height:100%; width:90vw; max-width:340px; background:#fff; border-right:1px solid var(--borde); transform:translateX(-100%); transition:transform .25s; z-index:60; }
+    #side-menu, .cart-panel{ transition:transform .25s; }
+    #side-menu{ position:fixed; top:0; left:0; height:100%; width:90vw; max-width:340px; background:#fff; border-right:1px solid var(--borde); transform:translateX(-100%); z-index:60; }
     #side-menu.open{ transform:translateX(0); }
-
-    .cart-panel{ position:fixed; top:0; right:0; height:100%; width:94vw; max-width:420px; background:#fff; transform:translateX(110%); transition:transform .25s; border-left:1px solid var(--borde); z-index:70; }
+    .cart-panel{ position:fixed; top:0; right:0; height:100%; width:94vw; max-width:420px; background:#fff; transform:translateX(110%); border-left:1px solid var(--borde); z-index:70; }
     .cart-panel.open{ transform:translateX(0); }
 
-    /* Botones (mejor área táctil) */
+    /* Botones */
     .btn { border-radius:12px; padding:.7rem 1rem; border:1px solid var(--borde); background:#f5f5f5; cursor:pointer; }
     .btn:hover{ background:#f0f0f0; }
     .btn:focus-visible{ outline:2px solid #000; outline-offset:2px; }
@@ -100,10 +102,10 @@
       flex:0 0 auto; border:1px solid var(--borde); border-radius:12px; background:#fff; scroll-snap-align:start;
       min-width:82vw; /* 1 tarjeta en xs */
     }
-    @media (min-width:480px){ .card{ min-width:60vw; } }      /* 1–2 tarjetas */
-    @media (min-width:640px){ .card{ min-width:45vw; } }      /* ~2 por vista */
-    @media (min-width:768px){ .card{ min-width:31vw; } }      /* 3 por vista */
-    @media (min-width:1024px){ .card{ min-width:23.5vw; } }   /* 4 por vista máx */
+    @media (min-width:480px){ .card{ min-width:60vw; } }
+    @media (min-width:640px){ .card{ min-width:45vw; } }
+    @media (min-width:768px){ .card{ min-width:31vw; } }
+    @media (min-width:1024px){ .card{ min-width:23.5vw; } }
 
     .arrow-btn{ position:absolute; top:50%; transform:translateY(-50%); width:40px; height:40px; border:1px solid var(--borde); background:#fff; border-radius:999px; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:.9; }
     .arrow-left{ left:6px; } .arrow-right{ right:6px; }
@@ -114,13 +116,10 @@
     .container{ max-width:1200px; margin:0 auto; padding-left:1.25rem; padding-right:1.25rem; }
     @media (min-width:640px){ .container{ padding-left:1.5rem; padding-right:1.5rem; } }
 
-    /* Imágenes cuadradas en cards */
     .img-clip { width:100%; aspect-ratio: 1 / 1; object-fit:cover; border-top-left-radius:12px; border-top-right-radius:12px; }
 
-    /* Scroll lock cuando paneles/modales abiertos */
     .no-scroll{ overflow:hidden; touch-action:none; }
 
-    /* Reduce motion si el usuario lo prefiere */
     @media (prefers-reduced-motion: reduce) {
       .carousel-track{ scroll-behavior:auto; }
       .overlay, #side-menu, .cart-panel{ transition:none !important; }
@@ -129,84 +128,57 @@
     @media (max-width:768px){ .nav-title{ font-size:14px; } }
   </style>
 </head>
-<body>
+<body class="flex flex-col min-h-screen">
 
   <!-- NAVBAR -->
   <nav id="navbar">
     <div class="nav-inner">
-      <button id="menu-btn" class="btn" aria-label="Abrir menú">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-      </button>
-
+      <button id="menu-btn" class="btn" aria-label="Abrir menú">☰</button>
       <a href="{{ url_for('index') }}" class="nav-title text-lg sm:text-xl font-playfair font-bold">FAIGOTHY</a>
-
       <div class="flex items-center gap-2">
         {% if current_user.is_authenticated %}
-          {% if IS_ADMIN %}
-            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary">Admin</a>
-          {% endif %}
+          {% if IS_ADMIN %}<a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary">Admin</a>{% endif %}
           <a href="{{ url_for('auth.logout') }}" class="btn">Salir</a>
         {% else %}
           <button id="open-login" class="btn">Iniciar sesión</button>
         {% endif %}
-
         <button id="open-cart" class="btn" aria-label="Abrir carrito">
-  <div class="flex items-center gap-2">
-    <!-- Badge pegado al icono (no al texto) -->
-    <span class="relative inline-flex">
-      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.6 8h13.2L17 13M7 13h10"/>
-      </svg>
-
-      {% set _qty = (CART_QTY or 0)|int %}
-      <span id="cart-count"
-            class="absolute -top-2 -right-2 min-w-[1.1rem] h-5 px-1 leading-5 text-center
-                   text-white text-[11px] font-semibold bg-red-500 rounded-full shadow
-                   ring-2 ring-white transition-transform duration-150
-                   {% if _qty <= 0 %}hidden{% endif %}">
-        {{ _qty }}
-      </span>
-    </span>
-
-    <span>Carrito</span>
-  </div>
-</button>
+          <div class="flex items-center gap-2">
+            <span class="relative inline-flex">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13l-1.6 8h13.2L17 13M7 13h10"/>
+              </svg>
+              {% set _qty = (CART_QTY or 0)|int %}
+              <span id="cart-count"
+                    class="absolute -top-2 -right-2 min-w-[1.1rem] h-5 px-1 leading-5 text-center
+                           text-white text-[11px] font-semibold bg-red-500 rounded-full shadow
+                           ring-2 ring-white transition-transform duration-150
+                           {% if _qty <= 0 %}hidden{% endif %}">
+                {{ _qty }}
+              </span>
+            </span>
+            <span>Carrito</span>
+          </div>
+        </button>
       </div>
     </div>
   </nav>
 
   <div id="overlay" class="overlay" aria-hidden="true"></div>
 
-  <!-- SIDE MENU (a11y) -->
+  <!-- SIDE MENU -->
   <aside id="side-menu" aria-label="Menú lateral" role="dialog" aria-modal="true" aria-hidden="true">
-    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-      <span class="text-lg font-playfair font-bold">Menú</span>
-      <button id="close-side" class="btn" aria-label="Cerrar menú">✕</button>
-    </div>
-    <nav class="flex flex-col px-5 py-4 gap-2">
-      <a href="#inicio" class="hover:underline">Inicio</a>
-      <button class="text-left hover:underline" data-action="toggle-submenu" data-target="submenu-catalogo">Catálogo ▾</button>
-      <div id="submenu-catalogo" class="pl-3 mt-1">
-        <a href="#accesorios-pelo" class="hover:underline">Accesorios para el pelo</a><br/>
-        <a href="#aros" class="hover:underline">Aros</a><br/>
-        <a href="#anillos" class="hover:underline">Anillos</a><br/>
-        <a href="#cinturones" class="hover:underline">Cinturones</a><br/>
-        <a href="#collares" class="hover:underline">Collares</a><br/>
-        <a href="#prendas" class="hover:underline">Prendas de vestir</a><br/>
-      </div>
-      <a href="#nosotros" class="hover:underline">Nosotros</a>
-      <a href="#" class="hover:underline">Contacto</a>
-    </nav>
+    ...
   </aside>
 
-  <!-- CONTENIDO -->
-  <main id="main-content">
+  <!-- MAIN CONTENT -->
+  <main id="main-content" class="flex-grow">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
         <div class="container mt-4">
           {% for category, msg in messages %}
-            <div class="p-3 mb-2 rounded border 
+            <div class="p-3 mb-2 rounded border
               {% if category == 'success' %} bg-green-50 border-green-200
               {% elif category == 'danger' %} bg-red-50 border-red-200
               {% else %} bg-gray-50 border-gray-200 {% endif %}">
@@ -216,25 +188,17 @@
         </div>
       {% endif %}
     {% endwith %}
-
     {% block content %}{% endblock %}
   </main>
 
-  <!-- CART PANEL (se actualiza por fetch /carrito/panel) -->
-  {# Nota: en partials/cart_panel.html añadí role="dialog" aria-modal="true" aria-hidden="true" y aria-labelledby #}
+  <!-- CART PANEL / LOGIN / TOASTS -->
   {% include 'partials/cart_panel.html' %}
-
-  <!-- LOGIN MODAL (carga /auth/login?partial=1) -->
   <div id="login-modal" class="hidden fixed inset-0 items-center justify-center z-[80]">
-    <div class="absolute inset-0 bg-black/40"></div>
-    <div id="login-modal-body" class="relative bg-white border border-gray-200 rounded-2xl p-6 w-11/12 max-w-md mx-auto">
-      <!-- El contenido se inyecta con fetch -->
-    </div>
+    ...
   </div>
-
-  <!-- Toasts -->
   <div id="toast-root" class="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
 
+  <!-- FOOTER -->
   <footer class="mt-12">
     <div class="container flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="text-left">

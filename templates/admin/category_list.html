@@ -3,7 +3,18 @@
 <section class="container section-spacing">
   <div class="flex items-center justify-between mb-4">
     <h1 class="font-playfair text-2xl sm:text-3xl font-bold">Categorías</h1>
-    <a href="{{ url_for('admin.category_new') }}" class="btn btn-primary">➕ Nueva</a>
+    <div class="flex gap-2">
+      <a href="{{ url_for('admin.category_new') }}" class="btn btn-primary flex items-center gap-2 px-4 py-2">
+        ➕ Nueva
+      </a>
+      <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary flex items-center gap-2 px-4 py-2">
+        <!-- Icono de flecha hacia la izquierda -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Volver al Panel
+      </a>
+    </div>
   </div>
 
   <div class="overflow-x-auto border rounded-xl">

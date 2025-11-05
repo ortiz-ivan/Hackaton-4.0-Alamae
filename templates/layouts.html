@@ -140,7 +140,7 @@
           {% if IS_ADMIN %}<a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary">Admin</a>{% endif %}
           <a href="{{ url_for('auth.logout') }}" class="btn">Salir</a>
         {% else %}
-          <button id="open-login" class="btn">Iniciar sesión</button>
+          <a href="{{ url_for('auth.login') }}" class="btn">Iniciar sesión</a>
         {% endif %}
         <button id="open-cart" class="btn" aria-label="Abrir carrito">
           <div class="flex items-center gap-2">

@@ -1,0 +1,43 @@
+{% extends "layouts.html" %}
+{% block content %}
+<section class="container section-spacing">
+  <div class="flex items-center justify-between mb-4">
+    <h1 class="font-playfair text-2xl sm:text-3xl font-bold">Productos</h1>
+    <a href="{{ url_for('admin.product_new') }}" class="btn btn-primary">➕ Nuevo</a>
+  </div>
+
+  <div class="overflow-x-auto border rounded-xl">
+    <table class="min-w-full text-sm">
+      <thead class="bg-gray-50 border-b">
+        <tr>
+          <th class="text-left p-3">ID</th>
+          <th class="text-left p-3">Nombre</th>
+          <th class="text-left p-3">Precio</th>
+          <th class="text-left p-3">Categoría</th>
+          <th class="text-left p-3">Activo</th>
+          <th class="p-3">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in productos %}
+        <tr class="border-b">
+          <td class="p-3">{{ p.id }}</td>
+          <td class="p-3">{{ p.nombre }}</td>
+          <td class="p-3">₲ {{ '%.0f'|format(p.precio or 0) }}</td>
+          <td class="p-3">{{ p.categoria.nombre if p.categoria else '-' }}</td>
+          <td class="p-3">{{ 'Sí' if p.activo else 'No' }}</td>
+          <td class="p-3 text-right">
+            <a href="{{ url_for('admin.product_edit', product_id=p.id) }}" class="btn">Editar</a>
+            <form method="post" action="{{ url_for('admin.product_delete', product_id=p.id) }}" class="inline" onsubmit="return confirm('¿Eliminar producto?');">
+              <button class="btn">Eliminar</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td class="p-3" colspan="6">Sin productos.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endblock %}

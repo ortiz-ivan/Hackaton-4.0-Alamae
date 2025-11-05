@@ -1,0 +1,49 @@
+{% extends "layouts.html" %}
+{% block content %}
+<section class="container section-spacing max-w-2xl">
+  <h1 class="font-playfair text-2xl sm:text-3xl font-bold mb-4">{{ 'Editar' if product else 'Nuevo' }} producto</h1>
+
+  <form method="post" enctype="multipart/form-data" class="space-y-3">
+    <div>
+      <label class="block text-sm mb-1">Nombre</label>
+      <input name="nombre" required class="w-full border rounded px-3 py-2" value="{{ product.nombre if product else '' }}">
+    </div>
+    <div>
+      <label class="block text-sm mb-1">Descripción</label>
+      <textarea name="descripcion" rows="3" class="w-full border rounded px-3 py-2">{{ product.descripcion if product else '' }}</textarea>
+    </div>
+    <div class="grid sm:grid-cols-2 gap-3">
+      <div>
+        <label class="block text-sm mb-1">Precio (PYG)</label>
+        <input name="precio" type="number" step="1" min="0" required class="w-full border rounded px-3 py-2" value="{{ product.precio if product else '' }}">
+      </div>
+      <div>
+        <label class="block text-sm mb-1">Categoría</label>
+        <select name="categoria_id" class="w-full border rounded px-3 py-2">
+          <option value="">—</option>
+          {% for c in categorias %}
+            <option value="{{ c.id }}" {% if product and product.categoria_id==c.id %}selected{% endif %}>{{ c.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div>
+      <label class="block text-sm mb-1">Imagen (opcional)</label>
+      <input type="file" name="imagen" accept=".png,.jpg,.jpeg,.gif,.webp,.avif" class="w-full border rounded px-3 py-2">
+      {% if product and product.imagen %}
+        <p class="text-sm mt-1">Actual: <code>{{ product.imagen }}</code></p>
+      {% endif %}
+    </div>
+
+    <div class="flex items-center gap-2">
+      <label class="text-sm"><input type="checkbox" name="activo" value="1" {% if not product or product.activo %}checked{% endif %}> Activo</label>
+    </div>
+
+    <div class="flex gap-2">
+      <button class="btn btn-primary">Guardar</button>
+      <a href="{{ url_for('admin.products') }}" class="btn">Cancelar</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

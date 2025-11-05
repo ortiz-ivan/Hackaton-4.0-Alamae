@@ -1,0 +1,23 @@
+{% extends "layouts.html" %}
+{% block content %}
+<section class="container section-spacing max-w-xl">
+  <h1 class="font-playfair text-2xl sm:text-3xl font-bold mb-4">Crear cuenta</h1>
+
+  <form method="post" action="{{ url_for('auth.register') }}" class="space-y-3">
+    <div>
+      <label class="block text-sm mb-1">Nombre</label>
+      <input name="nombre" required class="w-full border rounded px-3 py-2" placeholder="Tu nombre">
+    </div>
+    <div>
+      <label class="block text-sm mb-1">Email</label>
+      <input name="email" type="email" required class="w-full border rounded px-3 py-2" placeholder="tu@correo.com">
+    </div>
+    <div>
+      <label class="block text-sm mb-1">Contraseña</label>
+      <input name="password" type="password" required class="w-full border rounded px-3 py-2">
+    </div>
+    <button class="btn btn-primary w-full sm:w-auto">Registrarme</button>
+    <p class="text-sm mt-2">¿Ya tenés cuenta? <a href="{{ url_for('auth.login') }}" class="underline">Entrar</a></p>
+  </form>
+</section>
+{% endblock %}

@@ -1,0 +1,61 @@
+{# templates/partials/cart_panel.html #}
+{% set _items = items|default({}) %}
+{% set _total = (total|default(0))|float %}
+
+<aside id="cart-panel" class="cart-panel" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="cart-title">
+  <div class="p-5 flex items-center justify-between border-b border-gray-200">
+    <h3 id="cart-title" class="font-playfair font-bold text-lg">Tu carrito</h3>
+    <button id="close-cart-panel" class="btn" type="button" aria-label="Cerrar panel">✕</button>
+  </div>
+
+  <div id="cart-list" class="p-5 space-y-3 overflow-y-auto" style="max-height:calc(100% - 160px)">
+    {% if _items and _items|length %}
+      {% for pid, item in _items.items() %}
+        {% set _qty = (item.qty or 0)|int %}
+        {% set _price = (item.price or 0)|float %}
+        <div class="flex items-center gap-3 border-b border-gray-200 pb-3">
+          <div class="flex-1">
+            <p class="font-semibold">{{ item.name }}</p>
+            <p class="text-sm">x{{ _qty }} — ₲ {{ '%.0f' % (_price * _qty) }}</p>
+
+            <div class="mt-2 inline-flex items-center gap-2">
+              <!-- – -->
+              <form class="cart-qty-form" action="{{ url_for('cart.update', product_id=pid) }}" method="post">
+                <input type="hidden" name="qty" value="{{ _qty - 1 }}">
+                <button class="btn" type="button" data-action="qty">-</button>
+              </form>
+
+              <span class="px-2">{{ _qty }}</span>
+
+              <!-- + -->
+              <form class="cart-qty-form" action="{{ url_for('cart.update', product_id=pid) }}" method="post">
+                <input type="hidden" name="qty" value="{{ _qty + 1 }}">
+                <button class="btn" type="button" data-action="qty">+</button>
+              </form>
+
+              <!-- Eliminar línea -->
+              <form class="cart-remove-form" action="{{ url_for('cart.remove', product_id=pid) }}" method="post">
+                <button class="btn" type="button" data-action="remove">Eliminar</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p>Tu carrito está vacío</p>
+    {% endif %}
+  </div>
+
+  <div class="p-5 border-t border-gray-200">
+    <div class="flex justify-between items-center mb-3">
+      <p class="font-semibold">Subtotal</p>
+      <p id="cart-total" class="font-bold">₲ {{ '%.0f' % _total }}</p>
+    </div>
+    <div class="flex gap-2">
+      <form id="clear-cart-form" action="{{ url_for('cart.clear') }}" method="post">
+        <button id="clear-cart" class="btn" type="button">Vaciar carrito</button>
+      </form>
+      <a href="{{ url_for('checkout') }}" class="btn btn-primary">Finalizar</a>
+    </div>
+  </div>
+</aside>

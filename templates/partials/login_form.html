@@ -1,0 +1,14 @@
+<div class="flex items-center justify-between mb-4">
+  <h3 class="font-playfair font-bold text-xl">Iniciar sesión</h3>
+  <button id="close-login" class="btn">✕</button>
+</div>
+<form method="post" action="{{ url_for('auth.login') }}" class="max-w-md space-y-3" id="login-form">
+  <label class="block text-sm">Email</label>
+  <input name="email" type="email" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="email" required/>
+  <label class="block text-sm">Contraseña</label>
+  <input name="password" type="password" class="w-full border border-gray-300 rounded px-3 py-2" placeholder="contraseña" required/>
+  <div class="flex items-center justify-between">
+    <button class="btn btn-primary">Entrar</button>
+    <a href="{{ url_for('auth.register') }}" class="underline">Crear cuenta</a>
+  </div>
+</form>

@@ -1,0 +1,40 @@
+{% extends "layouts.html" %}
+{% block content %}
+<section class="container section-spacing">
+  <h1 class="font-playfair text-2xl sm:text-3xl font-bold mb-4">Finalizar compra</h1>
+
+  {% if not items %}
+    <p class="mb-6">Tu carrito está vacío 🛍️</p>
+    <a href="{{ url_for('index') }}" class="btn">Volver a la tienda</a>
+  {% else %}
+    <div class="grid md:grid-cols-3 gap-6">
+      <!-- Resumen -->
+      <div class="md:col-span-2 space-y-3">
+        {% for pid, item in items.items() %}
+          <div class="border rounded-xl p-3 flex items-start justify-between gap-3">
+            <div>
+              <p class="font-semibold">{{ item.name }}</p>
+              <p class="text-sm opacity-80">Cant: {{ item.qty }}</p>
+              <p class="text-sm mt-1">Precio: ₲ {{ '%.0f'|format(item.price) }}</p>
+            </div>
+            <p class="font-bold whitespace-nowrap">₲ {{ '%.0f'|format(item.price * item.qty) }}</p>
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- Total + acción -->
+      <div class="border rounded-2xl p-4 h-max">
+        <div class="flex items-center justify-between mb-3">
+          <span class="font-semibold">Subtotal</span>
+          <span class="font-bold">₲ {{ '%.0f'|format(total) }}</span>
+        </div>
+        <p class="text-sm text-gray-600 mb-4">En esta demo no se procesan pagos reales.</p>
+        <form method="post" action="{{ url_for('cart.clear') }}" onsubmit="showToast && showToast({type:'success', title:'Gracias por tu compra'});">
+          <button class="btn btn-primary w-full">Confirmar pedido</button>
+        </form>
+        <a href="{{ url_for('index') }}" class="btn w-full mt-2">Seguir comprando</a>
+      </div>
+    </div>
+  {% endif %}
+</section>
+{% endblock %}

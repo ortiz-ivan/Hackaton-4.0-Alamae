@@ -1,0 +1,130 @@
+{% extends "layouts.html" %}
+{% block content %}
+
+<!-- HERO (sin lazy en la imagen principal) -->
+<section id="inicio" class="max-w-7xl mx-auto px-6 py-10 grid md:grid-cols-2 gap-8 items-center">
+  <div>
+    <h1 class="font-playfair font-bold text-3xl sm:text-4xl">El susurro de una joya,<br>el eco de tu esencia</h1>
+    <p class="mt-3">Descubre piezas artesanales que combinan con tu estilo. Explora el catálogo y arma tu look.</p>
+  </div>
+  <div class="flex md:justify-end">
+    <img src="{{ url_for('static', filename='img/logo_faigothy.png') }}" alt="Faigothy logo" class="w-48 h-48 sm:w-60 sm:h-60 object-cover square-full">
+  </div>
+</section>
+
+<!-- GALERÍA TEMÁTICA (sí lazy) -->
+<section class="bg-white py-12">
+  <div class="max-w-7xl mx-auto px-6">
+    <h2 class="text-center text-gray-500 font-playfair text-2xl mb-6">Inspiraciones oscuras</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      <div class="overflow-hidden rounded-xl">
+        <img src="https://m.media-amazon.com/images/I/61c5c-QKsCL._AC_UF350,350_QL80_.jpg" class="w-full h-39 object-cover" alt="Accesorio 1" loading="lazy" decoding="async">
+      </div>
+      <div class="overflow-hidden rounded-xl">
+        <img src="https://i.pinimg.com/736x/28/6c/da/286cda472921a2c0d87451926fc50de3.jpg" class="w-full h-39 object-cover" alt="Accesorio 2" loading="lazy" decoding="async">
+      </div>
+      <div class="overflow-hidden rounded-xl">
+        <img src="https://i5.walmartimages.com/asr/dea1cf6a-05d4-4e5f-8999-416d9750ee08.61e7b6c98e74caa5d707f68898641fbd.jpeg?odnHeight=612&odnWidth=612&odnBg=FFFFFF" class="w-full h-38 object-cover" alt="Accesorio 3" loading="lazy" decoding="async">
+      </div>
+      <div class="overflow-hidden rounded-xl">
+        <img src="https://i.pinimg.com/736x/26/e9/6e/26e96eaff1538f9616007267a2b0b4c2.jpg" class="w-full h-38 object-cover" alt="Accesorio 4" loading="lazy" decoding="async">
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NOVEDADES (sí lazy en productos) -->
+<section id="novedades" class="max-w-7xl mx-auto px-6 section-spacing">
+  <h2 class="text-2xl sm:text-3xl font-playfair font-bold mb-5">Novedades</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    {% for p in latest_products %}
+      <article class="card product-card" data-id="{{ p.id }}">
+        {% set img_src = p.imagen if (p.imagen and (p.imagen.startswith('http://') or p.imagen.startswith('https://'))) else (p.imagen and url_for('static', filename='img/' + p.imagen)) %}
+        <img
+          src="{{ img_src or url_for('static', filename='img/placeholder.png') }}"
+          alt="{{ p.nombre }}"
+          class="w-full h-52 object-cover"
+          loading="lazy"
+          decoding="async">
+        <div class="p-4">
+          <h3 class="font-playfair font-bold text-lg">{{ p.nombre }}</h3>
+          <p class="text-sm mt-1">{{ p.descripcion or "Producto artesanal" }}</p>
+          <p class="mt-2 font-bold text-lg">₲ {{ '%.0f'|format(p.precio or 0) }}</p>
+          <form class="mt-3 add-to-cart-form" action="{{ url_for('cart.add', product_id=p.id) }}" method="post" data-product-id="{{ p.id }}">
+            <input type="hidden" name="qty" value="1">
+            <button class="btn">Añadir al carrito</button>
+          </form>
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- CATEGORÍAS EN CARRUSEL (sí lazy en productos) -->
+{% for slug, title in {
+  "accesorios-pelo":"Accesorios para el pelo",
+  "aros":"Aros",
+  "anillos":"Anillos",
+  "cinturones":"Cinturones",
+  "collares":"Collares",
+  "prendas":"Prendas de vestir"
+}.items() %}
+  <section id="{{ slug }}" class="max-w-7xl mx-auto px-6 section-spacing">
+    <h2 class="text-2xl sm:text-3xl font-playfair font-bold mb-5">{{ title }}</h2>
+    <div class="carousel-wrap">
+      <button class="arrow-btn arrow-left" data-action="scroll" data-dir="-1">‹</button>
+      <div id="track-{{ slug }}" class="carousel-track">
+        {% for p in (productos_by_cat.get(slug) or []) %}
+          <article class="card product-card" data-id="{{ p.id }}">
+            {% set img_src = p.imagen if (p.imagen and (p.imagen.startswith('http://') or p.imagen.startswith('https://'))) else (p.imagen and url_for('static', filename='img/' + p.imagen)) %}
+            <img
+              src="{{ img_src or url_for('static', filename='img/placeholder.png') }}"
+              alt="{{ p.nombre }}"
+              class="w-full h-52 object-cover"
+              loading="lazy"
+              decoding="async">
+            <div class="p-4">
+              <h3 class="font-playfair font-bold text-lg">{{ p.nombre }}</h3>
+              <p class="text-sm mt-1">{{ p.descripcion or "Producto artesanal" }}</p>
+              <p class="mt-2 font-bold text-lg">₲ {{ '%.0f'|format(p.precio or 0) }}</p>
+              <form class="mt-3 add-to-cart-form" action="{{ url_for('cart.add', product_id=p.id) }}" method="post" data-product-id="{{ p.id }}">
+                <input type="hidden" name="qty" value="1">
+                <button class="btn">Añadir al carrito</button>
+              </form>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+      <button class="arrow-btn arrow-right" data-action="scroll" data-dir="1">›</button>
+    </div>
+  </section>
+{% endfor %}
+
+<!-- NOSOTROS (recomendación aplicada) -->
+<section id="nosotros" class="p-8 bg-[#0d0d0d] text-white font-['Times New Roman']" style="color:white !important">
+  <div class="max-w-5xl mx-auto grid md:grid-cols-2 gap-8 items-center">
+    <div class="flex justify-center">
+      <img
+        src="https://static.vecteezy.com/system/resources/previews/019/863/472/non_2x/goth-aesthetic-sticker-set-free-vector.jpg"
+        class="rounded-2xl shadow-lg border border-[#222]"
+        alt="Accesorios góticos hechos a mano"
+        loading="lazy"
+        decoding="async">
+    </div>
+    <div>
+      <h2 class="text-4xl mb-4 font-bold">Nuestra Historia</h2>
+      <p class="mb-4 text-lg leading-relaxed">
+        FAIGOTHY nació del amor por los detalles góticos, las texturas antiguas y el trabajo hecho a mano.
+      </p>
+      <p class="mb-4 text-lg leading-relaxed">
+        Creamos piezas únicas para quienes se atreven a vestir lo diferente.
+      </p>
+      <h3 class="text-2xl mt-6 mb-2 font-semibold">Misión</h3>
+      <p class="text-lg leading-relaxed">
+        Promover autenticidad y rebeldía con estética gótica.
+      </p>
+    </div>
+  </div>
+</section>
+
+{% endblock %}

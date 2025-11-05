@@ -2,18 +2,24 @@ import os
 from flask import Flask, render_template, redirect, url_for, request
 from flask_login import LoginManager, current_user
 from models import db, User, Producto, Categoria
-from cart_utils import cart_items, cart_total  # no dependemos de cart_qty para evitar errores
+from cart_utils import (
+    cart_items,
+    cart_total,
+)  # no dependemos de cart_qty para evitar errores
+
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object("config")
 
-    # === Config Admin por email (podés moverlo a config.py si preferís) ===
+    # === Config Admin por email ===
     app.config.setdefault("ADMIN_EMAILS", {"admin@faigothy.com"})
 
-    # === Subida de imágenes (admin) ===
+    # === Subida de imágenes ===
     app.config.setdefault("UPLOAD_FOLDER", os.path.join(app.root_path, "static", "img"))
-    app.config.setdefault("ALLOWED_EXTENSIONS", {"png", "jpg", "jpeg", "gif", "webp", "avif"})
+    app.config.setdefault(
+        "ALLOWED_EXTENSIONS", {"png", "jpg", "jpeg", "gif", "webp", "avif"}
+    )
     os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
 
     # === DB ===
@@ -31,15 +37,16 @@ def create_app():
     # === Variables disponibles en todos los templates ===
     @app.context_processor
     def inject_globals():
-        # Cantidad de ítems del carrito desde sesión (server-side)
         try:
-            items = cart_items()  # dict {product_id: {name, price, qty}}
+            items = cart_items()
             cart_qty = sum((v.get("qty", 0) for v in items.values()))
         except Exception:
             cart_qty = 0
 
         admin_emails = app.config.get("ADMIN_EMAILS", set())
-        is_admin = bool(current_user.is_authenticated and current_user.email in admin_emails)
+        is_admin = bool(
+            current_user.is_authenticated and current_user.email in admin_emails
+        )
 
         return {
             "SITE_TITLE": "FAIGOTHY ✶ accesorios hechos a mano",
@@ -51,6 +58,7 @@ def create_app():
     from routes.cart import cart_bp
     from routes.auth import auth_bp
     from routes.admin import admin_bp
+
     app.register_blueprint(cart_bp, url_prefix="/carrito")
     app.register_blueprint(auth_bp, url_prefix="/auth")
     app.register_blueprint(admin_bp, url_prefix="/admin")
@@ -58,7 +66,6 @@ def create_app():
     # === Rutas ===
     @app.route("/", endpoint="index")
     def index():
-        # Novedades (24 últimos activos)
         latest_products = (
             Producto.query.filter_by(activo=True)
             .order_by(Producto.id.desc())
@@ -66,9 +73,17 @@ def create_app():
             .all()
         )
 
-        # Carruseles por categoría (12 por categoría)
-        slugs = ["accesorios-pelo", "aros", "anillos", "cinturones", "collares", "prendas"]
-        cats = {c.slug: c for c in Categoria.query.filter(Categoria.slug.in_(slugs)).all()}
+        slugs = [
+            "accesorios-pelo",
+            "aros",
+            "anillos",
+            "cinturones",
+            "collares",
+            "prendas",
+        ]
+        cats = {
+            c.slug: c for c in Categoria.query.filter(Categoria.slug.in_(slugs)).all()
+        }
         productos_by_cat = {}
         for slug in slugs:
             cat = cats.get(slug)
@@ -77,7 +92,8 @@ def create_app():
                 .order_by(Producto.id.desc())
                 .limit(12)
                 .all()
-                if cat else []
+                if cat
+                else []
             )
 
         return render_template(
@@ -85,6 +101,22 @@ def create_app():
             latest_products=latest_products,
             productos_by_cat=productos_by_cat,
         )
+
+    # === NUEVA RUTA DE BÚSQUEDA ===
+    @app.route("/search", endpoint="search")
+    def search():
+        query = request.args.get("q", "").strip()
+        if not query:
+            return redirect(url_for("index"))
+
+        # Buscar productos activos por nombre o descripción
+        results = Producto.query.filter(
+            Producto.activo == True,
+            (Producto.nombre.ilike(f"%{query}%"))
+            | (Producto.descripcion.ilike(f"%{query}%")),
+        ).all()
+
+        return render_template("search_results.html", results=results, query=query)
 
     @app.route("/checkout")
     def checkout():

@@ -1,0 +1,35 @@
+{% extends "layouts.html" %}
+
+{% block content %}
+<!-- SECCIÓN RESULTADOS DE BÚSQUEDA -->
+<section class="max-w-7xl mx-auto px-6 py-10">
+  <h2 class="text-2xl sm:text-3xl font-playfair font-bold mb-6">Resultados para "{{ query }}"</h2>
+
+  {% if results %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {% for p in results %}
+        <article class="card product-card" data-id="{{ p.id }}">
+          {% set img_src = p.imagen if (p.imagen and (p.imagen.startswith('http://') or p.imagen.startswith('https://'))) else (p.imagen and url_for('static', filename='img/' + p.imagen)) %}
+          <img
+            src="{{ img_src or url_for('static', filename='img/placeholder.png') }}"
+            alt="{{ p.nombre }}"
+            class="w-full h-52 object-cover"
+            loading="lazy"
+            decoding="async">
+          <div class="p-4">
+            <h3 class="font-playfair font-bold text-lg">{{ p.nombre }}</h3>
+            <p class="text-sm mt-1">{{ p.descripcion or "Producto artesanal" }}</p>
+            <p class="mt-2 font-bold text-lg">₲ {{ '%.0f'|format(p.precio or 0) }}</p>
+            <form class="mt-3 add-to-cart-form" action="{{ url_for('cart.add', product_id=p.id) }}" method="post" data-product-id="{{ p.id }}">
+              <input type="hidden" name="qty" value="1">
+              <button class="btn">Añadir al carrito</button>
+            </form>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-center text-gray-500 mt-4">No se encontraron productos que coincidan con "{{ query }}"</p>
+  {% endif %}
+</section>
+{% endblock %}

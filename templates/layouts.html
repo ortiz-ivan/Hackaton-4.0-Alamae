@@ -218,11 +218,25 @@
         <p class="font-playfair font-bold text-lg">FAIGOTHY ✶</p>
         <p class="text-sm">Accesorios hechos a mano</p>
       </div>
-      <div class="flex flex-col sm:flex-row items-center gap-3 text-sm">
-        <a href="https://instagram.com/faigothy" target="_blank" class="hover:underline">Instagram: @faigothy</a>
-        <a href="mailto:contacto@faigothy.com" class="hover:underline">contacto@faigothy.com</a>
-        <a href="https://wa.link/xhgc3r" class="hover:underline">WhastApp</a>
-      </div>
+      <div class="flex flex-col sm:flex-row items-center gap-6 text-sm">
+  <!-- Instagram -->
+  <a href="https://instagram.com/faigothy" target="_blank" class="flex items-center gap-2 hover:underline">
+    <img src="{{ url_for('static', filename='Instagram.png') }}" alt="Instagram" class="w-5 h-5">
+    <span>@faigothy</span>
+  </a>
+
+  <!-- Correo -->
+  <a href="mailto:contacto@faigothy.com" class="flex items-center gap-2 hover:underline">
+    <img src="{{ url_for('static', filename='gmail.png') }}" alt="Email" class="w-5 h-5">
+    <span>contacto@faigothy.com</span>
+  </a>
+
+  <!-- WhatsApp -->
+  <a href="https://wa.link/xhgc3r" target="_blank" class="flex items-center gap-2 hover:underline">
+    <img src="{{ url_for('static', filename='whatsapp.png') }}" alt="WhatsApp" class="w-5 h-5">
+    <span>WhatsApp</span>
+  </a>
+</div>
     </div>
     <div class="text-center text-xs text-gray-500 mt-4">© 2025 FAIGOTHY. Todos los derechos reservados.</div>
   </footer>

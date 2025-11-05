@@ -32,39 +32,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
-  <!-- JSON-LD (Organization + WebSite) -->
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"Organization",
-    "name":"FAIGOTHY",
-    "url":"{{ request.url_root }}",
-    "logo":"{{ url_for('static', filename='img/og_default.jpg', _external=True) }}",
-    "sameAs":["https://instagram.com/faigothy"]
-  }
-  </script>
-  <script type="application/ld+json">
-  {
-    "@context":"https://schema.org",
-    "@type":"WebSite",
-    "url":"{{ request.url_root }}",
-    "potentialAction":{
-      "@type":"SearchAction",
-      "target":"{{ request.url_root }}?q={search_term_string}",
-      "query-input":"required name=search_term_string"
-    }
-  }
-  </script>
-
   <!-- === CSS personalizado === -->
   <style>
     html, body { background:#fff; }
     .font-playfair { font-family: 'Times New Roman', serif; }
     :root{ --negro:#000; --borde:#e5e7eb; }
 
-    /* Estructura flex para sticky footer */
     body { display:flex; flex-direction:column; min-height:100vh; }
-
     main { flex-grow:1; }
 
     /* Navbar */
@@ -89,19 +63,15 @@
     .btn-primary{ background:#000; color:#fff !important; border-color:#000; }
     .btn-primary:hover{ filter:brightness(.95); }
 
-    /* Carruseles responsive con scroll-snap */
+    /* Carruseles */
     .carousel-wrap{ position:relative; }
     .carousel-track{
       display:flex; gap:16px; overflow-x:auto;
       -webkit-overflow-scrolling:touch; scroll-behavior:smooth; padding-bottom:10px;
-      scroll-snap-type:x mandatory;
-      -ms-overflow-style:none; scrollbar-width:none;
+      scroll-snap-type:x mandatory; scrollbar-width:none;
     }
     .carousel-track::-webkit-scrollbar{ display:none; }
-    .card{
-      flex:0 0 auto; border:1px solid var(--borde); border-radius:12px; background:#fff; scroll-snap-align:start;
-      min-width:82vw; /* 1 tarjeta en xs */
-    }
+    .card{ flex:0 0 auto; border:1px solid var(--borde); border-radius:12px; background:#fff; scroll-snap-align:start; min-width:82vw; }
     @media (min-width:480px){ .card{ min-width:60vw; } }
     @media (min-width:640px){ .card{ min-width:45vw; } }
     @media (min-width:768px){ .card{ min-width:31vw; } }
@@ -110,13 +80,11 @@
     .arrow-btn{ position:absolute; top:50%; transform:translateY(-50%); width:40px; height:40px; border:1px solid var(--borde); background:#fff; border-radius:999px; display:flex; align-items:center; justify-content:center; cursor:pointer; opacity:.9; }
     .arrow-left{ left:6px; } .arrow-right{ right:6px; }
 
-    /* Utilidades */
     .section-spacing{ padding-top:48px; padding-bottom:48px; }
     .hidden{ display:none !important; }
     .container{ max-width:1200px; margin:0 auto; padding-left:1.25rem; padding-right:1.25rem; }
     @media (min-width:640px){ .container{ padding-left:1.5rem; padding-right:1.5rem; } }
-
-    .img-clip { width:100%; aspect-ratio: 1 / 1; object-fit:cover; border-top-left-radius:12px; border-top-right-radius:12px; }
+    .img-clip { width:100%; aspect-ratio:1/1; object-fit:cover; border-top-left-radius:12px; border-top-right-radius:12px; }
 
     .no-scroll{ overflow:hidden; touch-action:none; }
 
@@ -124,8 +92,12 @@
       .carousel-track{ scroll-behavior:auto; }
       .overlay, #side-menu, .cart-panel{ transition:none !important; }
     }
-
     @media (max-width:768px){ .nav-title{ font-size:14px; } }
+
+    /* Mostrar submenú siempre en desktop */
+    @media (min-width:1024px){
+      #submenu-catalogo{ display:block !important; }
+    }
   </style>
 </head>
 <body class="flex flex-col min-h-screen">
@@ -169,10 +141,54 @@
 
   <!-- SIDE MENU -->
   <aside id="side-menu" aria-label="Menú lateral" role="dialog" aria-modal="true" aria-hidden="true">
-    ...
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+      <h2 id="side-title" class="text-lg font-playfair font-bold">Menú</h2>
+      <button id="close-side" class="btn" aria-label="Cerrar menú">✕</button>
+    </div>
+
+    <div class="px-5 py-4 space-y-4">
+      <!-- Buscador -->
+      <form action="{{ url_for('index') }}" method="get" class="flex gap-2">
+        <input type="search" name="q" placeholder="Buscar productos…" class="w-full rounded-xl border border-gray-300 px-3 py-2 outline-none focus:ring-2 focus:ring-black" value="{{ request.args.get('q','') }}"/>
+        <button class="px-4 py-2 rounded-xl bg-neutral-900 text-white hover:brightness-95">Buscar</button>
+      </form>
+
+      <nav class="flex flex-col gap-2 text-[15px]">
+        <a href="{{ url_for('index') }}#inicio" class="py-2 hover:underline">Inicio</a>
+
+        <!-- Submenú -->
+        <button type="button" class="text-left py-2 hover:underline lg:hidden"
+                data-action="toggle-submenu" data-target="submenu-catalogo"
+                aria-controls="submenu-catalogo" aria-expanded="false">
+          Catálogo ▾
+        </button>
+        <div id="submenu-catalogo" class="pl-3 mt-1 space-y-2 hidden lg:block">
+          <a href="{{ url_for('index') }}#accesorios-pelo" class="block hover:underline">Accesorios para el pelo</a>
+          <a href="{{ url_for('index') }}#aros" class="block hover:underline">Aros</a>
+          <a href="{{ url_for('index') }}#anillos" class="block hover:underline">Anillos</a>
+          <a href="{{ url_for('index') }}#cinturones" class="block hover:underline">Cinturones</a>
+          <a href="{{ url_for('index') }}#collares" class="block hover:underline">Collares</a>
+          <a href="{{ url_for('index') }}#prendas" class="block hover:underline">Prendas de vestir</a>
+        </div>
+
+        <a href="{{ url_for('index') }}#nosotros" class="py-2 hover:underline">Nosotros</a>
+        <a href="{{ url_for('index') }}#contacto" class="py-2 hover:underline">Contacto</a>
+      </nav>
+
+      {% if current_user.is_authenticated %}
+        <div class="pt-2 border-t border-gray-200">
+          {% if IS_ADMIN %}
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-primary w-full text-center">Panel Admin</a>
+          {% endif %}
+          <a href="{{ url_for('auth.logout') }}" class="btn w-full mt-2 text-center">Salir</a>
+        </div>
+      {% else %}
+        <a href="{{ url_for('auth.login') }}" class="btn">Iniciar sesión</a>
+      {% endif %}
+    </div>
   </aside>
 
-  <!-- MAIN CONTENT -->
+  <!-- MAIN -->
   <main id="main-content" class="flex-grow">
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
@@ -191,11 +207,8 @@
     {% block content %}{% endblock %}
   </main>
 
-  <!-- CART PANEL / LOGIN / TOASTS -->
   {% include 'partials/cart_panel.html' %}
-  <div id="login-modal" class="hidden fixed inset-0 items-center justify-center z-[80]">
-    ...
-  </div>
+  <div id="login-modal" class="hidden fixed inset-0 items-center justify-center z-[80]"></div>
   <div id="toast-root" class="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- FOOTER -->
